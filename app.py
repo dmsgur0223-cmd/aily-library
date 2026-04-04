@@ -14,7 +14,7 @@ def get_base64_of_bin_file(bin_file):
 
 # 배경으로 쓸 이미지를 하나 선택하세요 (예: aily1.png가 배경으로 적당하다면)
 try:
-    bin_str = get_base64_of_bin_file('aily1.png') # 배경 이미지 파일명
+    bin_str = get_base64_of_bin_file('aily3.png') # 배경 이미지 파일명
     bg_img_style = f"""
     <style>
     .stApp {{
