@@ -3,7 +3,7 @@ import pandas as pd
 import random 
 
 # 1. 웹 페이지 기본 설정 (탭 아이콘 변경)
-st.set_page_config(page_title="AILY 도서 추천", page_icon="🐰")
+st.set_page_config(page_title="Aily 도서 추천", page_icon="🐰")
 
 image_list = ["aily1.png", "aily2.png"]
 selected_image = random.choice(image_list)
@@ -16,7 +16,7 @@ with col2:
         st.warning("이미지 파일을 찾을 수 없습니다. 'aily1.png', 'aily2.png' 파일이 있는지 확인해주세요!")
 
 # 2. 화면 제목 및 부제목 변경
-st.title("🐰 심곡도서관 보조사서 AILY")
+st.title("🐰 심곡도서관 보조사서 Aily")
 st.subheader("관심 있는 주제를 고르면 책을 추천해 드립니다!")
 
 # ★ 새로 추가된 안내 문구 (st.caption을 쓰면 안내사항처럼 작고 깔끔하게 나옵니다)
