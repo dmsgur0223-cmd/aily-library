@@ -2,11 +2,56 @@ import streamlit as st
 import pandas as pd
 import random
 
-# 1. 웹 페이지 기본 설정
-st.set_page_config(page_title="AILY 도서 추천", page_icon="🐰")
+# 1. 웹 페이지 기본 설정 (탭 아이콘 변경)
+st.set_page_config(page_title="심곡도서관 AILY", page_icon="🐰", layout="centered")
 
-# 데이터 로드 함수
-@st.cache_data # 데이터를 매번 새로 읽지 않도록 캐싱합니다
+# CSS를 이용해 전체 배경색과 귀여운 손글씨 폰트를 지정합니다.
+st.markdown("""
+    <style>
+    /* 폰트 불러오기 (나눔손글씨 붓) */
+    @import url('https://fonts.googleapis.com/css2?family=Nanum+Brush+Script&display=swap');
+
+    /* 전체 배경색 및 폰트 설정 */
+    .stApp {
+        background-color: #FFFDF8; /* 부드러운 크림색 */
+    }
+    
+    html, body, [class*="css"] {
+        font-family: 'Nanum Brush Script', cursive !important; /* 귀여운 손글씨 */
+        color: #555;
+        font-size: 1.2em; /* 손글씨는 크게 봐야 귀여워요 */
+    }
+    
+    /* 제목 스타일 커스텀 */
+    h1 {
+        color: #FFB6C1 !important; /* 파스텔 핑크 */
+        font-weight: 800;
+        text-align: center;
+        font-size: 2.5em;
+        margin-bottom: 30px;
+    }
+    
+    /* 버튼 스타일 커스텀 */
+    .stButton>button {
+        background-color: #FFB6C1; /* 파스텔 핑크 */
+        color: white;
+        border-radius: 25px; /* 아주 둥글게 */
+        border: none;
+        padding: 10px 25px;
+        font-size: 1.2em;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #FF99AA; /* 조금 더 진한 핑크 */
+        transform: scale(1.1);
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+# 데이터 로드 함수 (캐싱 적용)
+@st.cache_data
 def load_data(file_name):
     try:
         return pd.read_excel(file_name, sheet_name=None)
@@ -16,78 +61,88 @@ def load_data(file_name):
 file_path = '학습데이터.xlsx'
 all_topics_data = load_data(file_path)
 
-# 사이드바 설정 (Gemini 왼쪽 메뉴 느낌)
+
+# --- 사이드바 영역 (귀엽게 꾸미기) ---
 with st.sidebar:
-    st.title("🐰 AILY 설정")
+    st.markdown("<h2 style='text-align: center; color: #FFB6C1; font-family: 'Nanum Brush Script', cursive;'>🐰 AILY 설정 🐰</h2>", unsafe_allow_html=True)
     image_list = ["aily1.png", "aily2.png"]
     try:
+        # 이미지가 있다면 랜덤하게 표시
         st.image(random.choice(image_list), use_container_width=True)
     except:
-        pass
+        # 이미지가 없을 때를 대비한 예외 처리
+        st.warning("이미지 파일을 찾을 수 없습니다. ('aily1.png', 'aily2.png' 확인)")
+    
     st.divider()
-    st.caption("심곡도서관 보조사서 AILY")
-    st.caption("※ 이미 대출 중일 수도 있어요! 😅")
+    st.caption("🏢 심곡도서관 보조사서 AILY")
+    st.caption("💬 무엇이든 물어보세요!")
+    st.caption("⚠️ 이미 대출 중일 수도 있어요 😅")
 
-# 메인 화면 제목
-st.title("📚 AI 사서 AILY")
 
-# 2. 채팅 기록 초기화
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "안녕하세요! 심곡도서관 보조사서 **AILY**입니다. 어떤 주제의 책을 추천해 드릴까요?"}
-    ]
+# --- 메인 화면 영역 ---
+st.title("🎀 심곡도서관 도서 처방전 🎀")
 
-# 3. 기존 채팅 기록 표시
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# 4. 입력창 및 추천 로직
 if all_topics_data:
     topics = list(all_topics_data.keys())
     
-    # 채팅 하단에 주제 선택 버튼(또는 입력창) 배치
-    selected_topic = st.selectbox("추천받고 싶은 주제를 선택하세요:", ["선택안함"] + topics)
-
-    if selected_topic != "선택안함":
-        # 사용자 메시지 표시
-        user_input = f"'{selected_topic}' 주제의 책을 추천해줘!"
-        st.chat_message("user").markdown(user_input)
-        st.session_state.messages.append({"role": "user", "content": user_input})
-
-        # AI 추천 로직 가동
-        with st.chat_message("assistant"):
-            with st.spinner('AILY가 서가에서 책을 찾는 중...'):
-                df = all_topics_data[selected_topic]
+    # 주제 선택창 (디자인된 테마 적용됨)
+    selected_topic = st.selectbox("어떤 주제의 책을 찾으시나요?", ["주제를 선택해 주세요"] + topics)
+    
+    # 추천받기 버튼
+    if st.button(f"'{selected_topic}' 책 추천받기 🎁") and selected_topic != "주제를 선택해 주세요":
+        with st.spinner('AILY가 서가에서 책을 찾는 중...'):
+            df = all_topics_data[selected_topic]
+            
+            if df.empty:
+                st.warning(f"앗! '{selected_topic}' 주제에 추천할 도서가 아직 비어있습니다. 😅")
+            else:
+                num_books = min(3, len(df))
+                recommended = df.sample(n=num_books)
                 
-                if df.empty:
-                    response = f"앗! '{selected_topic}' 주제는 아직 비어있네요. 😅"
-                    st.warning(response)
-                else:
-                    num_books = min(3, len(df))
-                    recommended = df.sample(n=num_books)
+                # 결과 상단 메시지
+                st.markdown(f"<h3 style='text-align: center; color: #FF99AA; margin-top: 30px;'>❤️ AILY의 맞춤 처방 ❤️</h3>", unsafe_allow_html=True)
+                
+                for _, row in recommended.iterrows():
+                    try:
+                        # 데이터 인덱싱 (기존 코드 유지)
+                        reg_number, call_number, title, author, publisher = row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4]
+                    except IndexError:
+                        reg_number, call_number, title, author, publisher = "정보 없음", "정보 없음", "정보 없음", "정보 없음", "정보 없음"
                     
-                    response = f"**{selected_topic}** 주제에서 좋아하실 만한 책들을 찾아왔어요! ❤️"
-                    st.markdown(response)
-                    
-                    for _, row in recommended.iterrows():
-                        try:
-                            # 기존 코드의 데이터 인덱싱 유지
-                            reg_num, call_num, title, author, pub = row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4]
-                        except:
-                            reg_num, call_num, title, author, pub = "정보없음", "정보없음", "정보없음", "정보없음", "정보없음"
+                    # --- [핵심] HTML/CSS 기반 귀여운 구름 카드 디자인 주입 ---
+                    book_card_html = f"""
+                    <div style="
+                        background-color: #ffffff;
+                        padding: 30px;
+                        border-radius: 20px;
+                        border-left: 10px solid #FFB6C1;
+                        box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
+                        margin-bottom: 25px;
+                        transition: transform 0.2s ease;
+                    ">
+                        <h2 style="color: #FFB6C1; margin-top: 0; margin-bottom: 10px; font-family: 'Nanum Brush Script', cursive !important;">📖 {title}</h2>
+                        <p style="color: #777; font-size: 0.9em; margin-bottom: 15px;">👤 저자/발행: {author} / {publisher}</p>
                         
-                        book_info = f"""
----
-📖 **{title}**
-👤 저자/발행: {author} / {pub}
-📍 청구기호: **{call_num}**
-🔖 등록번호: {reg_num}
-"""
-                        st.info(book_info)
-                        response += book_info # 전체 대화 기록 저장을 위해 합침
+                        <div style="
+                            background-color: #FFF0F5; /* 파스텔 핑크 */
+                            padding: 15px;
+                            border-radius: 15px;
+                            border: 2px dashed #EAE0D5;
+                        ">
+                            <p style="margin: 0; font-weight: bold; color: #FFB6C1; font-size: 1.2em; font-family: 'Nanum Brush Script', cursive !important;">📍 청구기호: {call_number}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #999; font-family: 'Nanum Brush Script', cursive !important;">🔖 등록번호: {reg_number}</p>
+                        </div>
+                        
+                        <p style="margin-top: 15px; margin-bottom: 0; color: #6F5642; font-style: italic; font-family: 'Nanum Brush Script', cursive !important;">
+                            👩‍🏫 사서 AILY의 한마디: "이 책은 {selected_topic} 주제를 처음 접하는 분들에게 딱 맞는 깊이와 재미를 가지고 있어요. 꼭 한 번 읽어보시길 권해드려요!"
+                        </p>
+                    </div>
+                    """
+                    # st.markdown을 이용해 HTML 코드를 화면에 그립니다.
+                    st.markdown(book_card_html, unsafe_allow_html=True)
+                    
+                # 하단 안내 멘트
+                st.caption("※ 도서관 홈페이지에서 실시간 대출 상태를 꼭 확인해 주세요!")
 
-        # 대화 기록 저장
-        st.session_state.messages.append({"role": "assistant", "content": response})
 else:
     st.error("엑셀 파일을 찾을 수 없습니다. '학습데이터.xlsx' 파일이 있는지 확인해주세요.")
