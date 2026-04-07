@@ -1,0 +1,21 @@
+name: Keep Aily Alive
+on:
+  schedule:
+    - cron: '0 * * * *' # 매 정시마다 실행 (한국 시간 기준은 +9시간 차이 나지만 상관없음)
+  workflow_dispatch: # 나중에 수동으로 테스트해보고 싶을 때 사용
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # 최신 버전으로 수정함
+      - name: Update timestamp
+        run: date > last_run.txt
+      - name: Commit changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add last_run.txt
+          git commit -m "Keep Aily server awake"
+          git push
