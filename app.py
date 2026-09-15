@@ -19,9 +19,6 @@ with col2:
 st.title("🐰 심곡도서관 보조사서 Aily")
 st.subheader("관심 있는 주제를 고르면 책을 추천해 드립니다!")
 
-# ★ 새로 추가된 안내 문구 (st.caption을 쓰면 안내사항처럼 작고 깔끔하게 나옵니다)
-st.caption("※ 이미 대출중일수도 있어요! 😅") 
-
 st.divider() 
 
 def load_data(file_name):
