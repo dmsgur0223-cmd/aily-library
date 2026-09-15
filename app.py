@@ -1,35 +1,33 @@
 import streamlit as st
 import pandas as pd
 import random
+import os
 
-# =========================================================
-# 1. 웹 페이지 기본 설정
-# =========================================================
+# --------------------------------------------------
+# 기본 설정
+# --------------------------------------------------
+
 st.set_page_config(
     page_title="Aily 도서 추천",
     page_icon="🐰",
     layout="centered"
 )
 
-# =========================================================
-# 2. 디자인
-# =========================================================
+# --------------------------------------------------
+# CSS 디자인
+# --------------------------------------------------
+
 st.markdown("""
 <style>
 
 .stApp {
-    background: linear-gradient(
-        180deg,
-        #f8f6ff 0%,
-        #ffffff 50%,
-        #faf9ff 100%
-    );
+    background: linear-gradient(180deg, #f8f6ff 0%, #ffffff 55%, #faf9ff 100%);
 }
 
 .block-container {
     max-width: 850px;
-    padding-top: 2rem;
-    padding-bottom: 4rem;
+    padding-top: 40px;
+    padding-bottom: 50px;
 }
 
 /* 메인 제목 */
@@ -38,198 +36,264 @@ st.markdown("""
     font-size: 2.1rem;
     font-weight: 800;
     color: #4b3f72;
-    margin-top: 0.5rem;
-    margin-bottom: 0.3rem;
+    margin-top: 10px;
+    margin-bottom: 5px;
 }
 
 .sub-title {
     text-align: center;
-    color: #77718b;
     font-size: 1rem;
-    margin-bottom: 2rem;
+    color: #81799a;
+    margin-bottom: 25px;
 }
 
 /* 메뉴 카드 */
 .menu-card {
     background: white;
-    border: 1px solid #ebe7f5;
+    border: 1px solid #e7e0f5;
     border-radius: 20px;
-    padding: 22px;
-    margin: 12px 0;
-    box-shadow: 0 5px 20px rgba(90, 70, 130, 0.06);
+    padding: 25px 28px;
+    margin-top: 18px;
+    margin-bottom: 10px;
+    box-shadow: 0 5px 18px rgba(80, 60, 120, 0.07);
 }
 
 .menu-title {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 800;
-    color: #51456f;
-    margin-bottom: 5px;
+    color: #4b3f72;
+    margin-bottom: 12px;
 }
 
 .menu-description {
-    font-size: 0.9rem;
-    color: #888;
-    margin-bottom: 12px;
+    background: #f7f8fa;
+    border-radius: 12px;
+    padding: 15px 18px;
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.7;
 }
 
 /* 버튼 */
 .stButton > button {
     width: 100%;
     height: 52px;
-    border-radius: 14px;
     border: none;
+    border-radius: 14px;
     background: linear-gradient(135deg, #6f5aa8, #8975c2);
     color: white;
     font-size: 1rem;
     font-weight: 700;
-    box-shadow: 0 5px 15px rgba(111, 90, 168, 0.18);
-    transition: 0.2s;
+    box-shadow: 0 6px 15px rgba(111, 90, 168, 0.20);
+    transition: all 0.2s ease;
 }
 
 .stButton > button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(111, 90, 168, 0.25);
+    box-shadow: 0 9px 20px rgba(111, 90, 168, 0.28);
+}
+
+/* 추천 제목 */
+.recommend-title {
+    background: linear-gradient(135deg, #6f5aa8, #8975c2);
+    color: white;
+    border-radius: 15px;
+    padding: 17px 20px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 15px;
+    margin-bottom: 18px;
 }
 
 /* 책 카드 */
 .book-card {
     background: white;
+    border: 1px solid #e8e2f2;
     border-radius: 18px;
-    padding: 20px 22px;
-    margin: 14px 0;
-    border: 1px solid #ebe8f2;
-    box-shadow: 0 5px 18px rgba(60, 50, 90, 0.07);
+    padding: 24px;
+    margin: 15px 0;
+    box-shadow: 0 5px 18px rgba(70, 50, 100, 0.08);
 }
 
 .book-number {
-    display: inline-block;
-    background: #eeeafd;
-    color: #6857a0;
-    border-radius: 20px;
-    padding: 4px 11px;
-    font-size: 0.8rem;
+    color: #8069b5;
     font-weight: 700;
+    font-size: 0.9rem;
     margin-bottom: 8px;
 }
 
 .book-title {
-    font-size: 1.25rem;
+    color: #3f3656;
+    font-size: 1.3rem;
     font-weight: 800;
-    color: #302b3d;
-    margin-bottom: 12px;
+    margin-bottom: 18px;
 }
 
 .book-info {
-    color: #686474;
-    font-size: 0.92rem;
-    line-height: 1.8;
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 2;
 }
 
 .call-number {
-    background: #f7f5fc;
+    background: #f4f0fb;
+    color: #5d4c86;
     border-radius: 10px;
-    padding: 8px 12px;
-    display: inline-block;
-    color: #50447a;
-    font-weight: 700;
-    margin-top: 5px;
-}
-
-/* 추천 결과 제목 */
-.recommend-title {
-    background: linear-gradient(135deg, #6f5aa8, #8b78c6);
-    color: white;
-    border-radius: 16px;
-    padding: 15px 20px;
-    margin: 25px 0 15px 0;
-    font-size: 1.1rem;
+    padding: 10px 14px;
+    margin-top: 15px;
     font-weight: 700;
 }
 
-/* 오늘의 한 권 */
+/* 오늘의 책 */
 .today-book {
-    background: linear-gradient(
-        135deg,
-        #fffaf0,
-        #ffffff
-    );
-    border: 1px solid #f0e4c7;
+    background: linear-gradient(135deg, #fffaf0, #fffdf8);
+    border: 1px solid #f0dfb8;
     border-radius: 20px;
     padding: 25px;
-    margin-top: 20px;
-    box-shadow: 0 6px 20px rgba(120, 90, 40, 0.08);
+    margin-top: 15px;
+    margin-bottom: 18px;
+    text-align: center;
 }
 
 .today-label {
-    color: #9a7835;
+    color: #b78628;
     font-size: 0.85rem;
     font-weight: 800;
-    margin-bottom: 8px;
+    letter-spacing: 1px;
 }
 
 .today-title {
-    font-size: 1.45rem;
+    color: #584a32;
+    font-size: 1.25rem;
     font-weight: 800;
-    color: #403827;
-    margin-bottom: 15px;
+    margin-top: 8px;
 }
 
-/* 구분선 */
-hr {
-    border: none;
-    height: 1px;
-    background: #e9e5f1;
-    margin: 25px 0;
+/* 처음으로 */
+.home-button > button {
+    background: white !important;
+    color: #6f5aa8 !important;
+    border: 1px solid #d9d0eb !important;
+    box-shadow: none !important;
 }
 
-/* 하단 */
+.home-button > button:hover {
+    background: #f7f3ff !important;
+}
+
+/* 푸터 */
 .footer {
     text-align: center;
-    color: #aaa5b4;
+    color: #aaa;
     font-size: 0.8rem;
-    margin-top: 35px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 
-# =========================================================
-# 3. 데이터 불러오기
-# =========================================================
+# --------------------------------------------------
+# 엑셀 데이터 불러오기
+# --------------------------------------------------
+
+file_path = "학습데이터.xlsx"
+
+
+@st.cache_data
 def load_data(file_name):
     return pd.read_excel(file_name, sheet_name=None)
 
 
-file_path = "학습데이터.xlsx"
+# --------------------------------------------------
+# 값 정리 함수
+# --------------------------------------------------
 
+def clean_value(value):
+    if value is None:
+        return "정보 없음"
+
+    try:
+        if pd.isna(value):
+            return "정보 없음"
+    except:
+        pass
+
+    return str(value)
+
+
+def get_book_info(row, position):
+    try:
+        return clean_value(row.iloc[position])
+    except:
+        return "정보 없음"
+
+
+# --------------------------------------------------
+# 전체 학습데이터에서 책 목록 만들기
+# --------------------------------------------------
+
+def make_all_books(all_topics_data):
+
+    books = []
+
+    for topic, df in all_topics_data.items():
+
+        if df is None or df.empty:
+            continue
+
+        for _, row in df.iterrows():
+
+            books.append({
+                "topic": clean_value(topic),
+                "reg_number": get_book_info(row, 0),
+                "call_number": get_book_info(row, 1),
+                "title": get_book_info(row, 2),
+                "author": get_book_info(row, 3),
+                "publisher": get_book_info(row, 4)
+            })
+
+    return books
+
+
+# --------------------------------------------------
+# 메인
+# --------------------------------------------------
 
 try:
 
     all_topics_data = load_data(file_path)
 
-    # =====================================================
-    # 4. Aily 이미지
-    # =====================================================
-    image_list = ["aily1.png", "aily2.png"]
-    selected_image = random.choice(image_list)
+    # --------------------------------------------------
+    # 이미지
+    # --------------------------------------------------
 
-    col1, col2, col3 = st.columns([1, 1.5, 1])
+    image_list = []
 
-    with col2:
-        try:
+    if os.path.exists("aily1.png"):
+        image_list.append("aily1.png")
+
+    if os.path.exists("aily2.png"):
+        image_list.append("aily2.png")
+
+    if image_list:
+
+        selected_image = random.choice(image_list)
+
+        col1, col2, col3 = st.columns([1, 1.5, 1])
+
+        with col2:
             st.image(
                 selected_image,
-                use_container_width=True
-            )
-        except FileNotFoundError:
-            st.warning(
-                "'aily1.png', 'aily2.png' 파일을 확인해주세요."
+                width="stretch"
             )
 
-    # =====================================================
-    # 5. 제목
-    # =====================================================
+    # --------------------------------------------------
+    # 제목
+    # --------------------------------------------------
+
     st.markdown(
         '<div class="main-title">🐰 심곡도서관 보조사서 Aily</div>',
         unsafe_allow_html=True
@@ -240,117 +304,137 @@ try:
         unsafe_allow_html=True
     )
 
-    st.divider()
+    # --------------------------------------------------
+    # 세션 상태
+    # --------------------------------------------------
 
+    if "mode" not in st.session_state:
+        st.session_state["mode"] = "home"
 
-    # =====================================================
-    # 6. 첫 화면 - 북큐레이션
-    # =====================================================
-    st.markdown(
-        """
+    if "today_book" not in st.session_state:
+        st.session_state["today_book"] = None
+
+    if "recommended_books" not in st.session_state:
+        st.session_state["recommended_books"] = None
+
+    # --------------------------------------------------
+    # HOME 화면
+    # --------------------------------------------------
+
+    if st.session_state["mode"] == "home":
+
+        # 북큐레이션
+        st.markdown("""
         <div class="menu-card">
+
             <div class="menu-title">
                 📚 북큐레이션 추천
             </div>
 
             <div class="menu-description">
-                관심 있는 주제를 선택하면
-                Aily가 책 3권을 추천해드려요.
+                관심 있는 주제를 선택하면<br>
+                <b>Aily</b>가 책 3권을 추천해드려요.
             </div>
+
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        """, unsafe_allow_html=True)
 
-    if st.button(
-        "📚 북큐레이션에서 3권 추천받기",
-        key="curation_button"
-    ):
-        st.session_state["mode"] = "curation"
+        if st.button(
+            "📚 북큐레이션에서 3권 추천받기",
+            key="curation_button"
+        ):
 
+            st.session_state["mode"] = "curation"
+            st.session_state["recommended_books"] = None
 
-    # =====================================================
-    # 7. 첫 화면 - 오늘의 한 권
-    # =====================================================
-    st.markdown(
-        """
+            st.rerun()
+
+        # 오늘의 한 권
+        st.markdown("""
         <div class="menu-card">
+
             <div class="menu-title">
                 🎁 오늘의 한 권
             </div>
 
             <div class="menu-description">
-                학습데이터에 등록된 모든 도서 중
-                Aily가 오늘의 책 한 권을 골라드려요.
+                학습데이터에 등록된 모든 도서 중<br>
+                <b>Aily</b>가 오늘의 책 한 권을 골라드려요.
             </div>
+
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        """, unsafe_allow_html=True)
 
-    if st.button(
-        "🎁 오늘의 한 권 만나보기",
-        key="today_button"
-    ):
-        st.session_state["mode"] = "today"
+        if st.button(
+            "🎁 오늘의 한 권 만나보기",
+            key="today_button"
+        ):
 
+            all_books = make_all_books(all_topics_data)
 
-    # =====================================================
-    # 8. 북큐레이션 추천 화면
-    # =====================================================
-    if st.session_state.get("mode") == "curation":
+            if all_books:
+                st.session_state["today_book"] = random.choice(all_books)
+                st.session_state["mode"] = "today"
 
-        st.divider()
+            else:
+                st.warning("학습데이터에 등록된 도서가 없습니다.")
+
+            st.rerun()
+
+    # --------------------------------------------------
+    # 북큐레이션 화면
+    # --------------------------------------------------
+
+    elif st.session_state["mode"] == "curation":
 
         st.markdown(
-            """
-            <div class="recommend-title">
-                📚 북큐레이션 주제 선택
-            </div>
-            """,
+            '<div class="recommend-title">📚 북큐레이션 주제 선택</div>',
             unsafe_allow_html=True
         )
 
-        topics = list(all_topics_data.keys())
+        topics = [
+            topic
+            for topic, df in all_topics_data.items()
+            if df is not None and not df.empty
+        ]
 
-        selected_topic = st.selectbox(
-            "어떤 주제의 책을 찾으시나요?",
-            topics,
-            key="topic_select"
-        )
+        if not topics:
 
-        selected_df = all_topics_data[selected_topic]
+            st.warning("학습데이터에 등록된 북큐레이션 주제가 없습니다.")
 
-        st.caption(
-            f"📖 '{selected_topic}' 주제 도서 "
-            f"{len(selected_df):,}권"
-        )
+        else:
 
-        if st.button(
-            f"✨ '{selected_topic}' 책 3권 추천받기",
-            key="recommend_button"
-        ):
+            selected_topic = st.selectbox(
+                "어떤 주제의 책을 찾으시나요?",
+                topics,
+                key="topic_select"
+            )
 
-            df = all_topics_data[selected_topic]
+            selected_df = all_topics_data[selected_topic]
 
-            if df.empty:
+            st.caption(
+                f"📖 '{selected_topic}' 주제 도서 "
+                f"{len(selected_df):,}권"
+            )
 
-                st.warning(
-                    f"앗! '{selected_topic}' 주제에 "
-                    "추천할 도서가 아직 비어있어요. 😅"
+            if st.button(
+                f"✨ '{selected_topic}' 책 3권 추천받기",
+                key="recommend_button"
+            ):
+
+                num_books = min(3, len(selected_df))
+
+                st.session_state["recommended_books"] = (
+                    selected_df.sample(n=num_books)
                 )
 
-            else:
+            # 추천 결과
+            recommended = st.session_state["recommended_books"]
 
-                num_books = min(3, len(df))
-                recommended = df.sample(n=num_books)
+            if recommended is not None:
 
                 st.markdown(
-                    f"""
-                    <div class="recommend-title">
-                        🐰 Aily의 '{selected_topic}' 추천 도서
-                    </div>
-                    """,
+                    f'<div class="recommend-title">✨ Aily가 추천하는 {selected_topic} 도서</div>',
                     unsafe_allow_html=True
                 )
 
@@ -359,32 +443,18 @@ try:
                     start=1
                 ):
 
-                    def get_value(position):
-
-                        try:
-                            value = row.iloc[position]
-
-                            if pd.isna(value):
-                                return "정보 없음"
-
-                            return str(value)
-
-                        except (IndexError, KeyError):
-                            return "정보 없음"
-
-
-                    reg_number = get_value(0)
-                    call_number = get_value(1)
-                    title = get_value(2)
-                    author = get_value(3)
-                    publisher = get_value(4)
+                    reg_number = get_book_info(row, 0)
+                    call_number = get_book_info(row, 1)
+                    title = get_book_info(row, 2)
+                    author = get_book_info(row, 3)
+                    publisher = get_book_info(row, 4)
 
                     st.markdown(
                         f"""
                         <div class="book-card">
 
                             <div class="book-number">
-                                추천 {book_index}
+                                📚 Aily's PICK {book_index}
                             </div>
 
                             <div class="book-title">
@@ -392,13 +462,17 @@ try:
                             </div>
 
                             <div class="book-info">
-                                👤 <b>저자</b>　{author}<br>
-                                🏢 <b>출판사</b>　{publisher}<br>
-                                🔖 <b>등록번호</b>　{reg_number}<br>
 
-                                <div class="call-number">
-                                    📍 청구기호　{call_number}
-                                </div>
+                                👤 <b>저자</b>　{author}<br>
+
+                                🏢 <b>출판사</b>　{publisher}<br>
+
+                                🏷️ <b>등록번호</b>　{reg_number}
+
+                            </div>
+
+                            <div class="call-number">
+                                📍 청구기호　{call_number}
                             </div>
 
                         </div>
@@ -406,74 +480,57 @@ try:
                         unsafe_allow_html=True
                     )
 
+        st.write("")
 
-    # =====================================================
-    # 9. 오늘의 한 권
-    # =====================================================
-    elif st.session_state.get("mode") == "today":
+        # 처음으로
+        st.markdown(
+            '<div class="home-button">',
+            unsafe_allow_html=True
+        )
 
-        st.divider()
+        if st.button(
+            "🏠 처음으로 돌아가기",
+            key="home_from_curation"
+        ):
 
-        # 모든 시트의 도서를 하나로 합치기
-        all_books = []
+            st.session_state["mode"] = "home"
+            st.session_state["recommended_books"] = None
 
-        for topic, df in all_topics_data.items():
+            st.rerun()
 
-            if not df.empty:
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True
+        )
 
-                for _, row in df.iterrows():
+    # --------------------------------------------------
+    # 오늘의 한 권 화면
+    # --------------------------------------------------
 
-                    all_books.append({
-                        "topic": topic,
+    elif st.session_state["mode"] == "today":
 
-                        "reg_number":
-                            row.iloc[0]
-                            if len(row) > 0
-                            else "정보 없음",
+        today_book = st.session_state["today_book"]
 
-                        "call_number":
-                            row.iloc[1]
-                            if len(row) > 1
-                            else "정보 없음",
+        if today_book is None:
 
-                        "title":
-                            row.iloc[2]
-                            if len(row) > 2
-                            else "정보 없음",
-
-                        "author":
-                            row.iloc[3]
-                            if len(row) > 3
-                            else "정보 없음",
-
-                        "publisher":
-                            row.iloc[4]
-                            if len(row) > 4
-                            else "정보 없음"
-                    })
-
-
-        if not all_books:
-
-            st.warning(
-                "학습데이터에 등록된 도서가 없습니다."
-            )
+            st.session_state["mode"] = "home"
+            st.rerun()
 
         else:
 
-            today_book = random.choice(all_books)
+            st.markdown("""
+            <div class="today-book">
 
+                <div class="today-label">
+                    🎁 TODAY'S BOOK
+                </div>
 
-            # -------------------------------------------------
-            # 값 정리
-            # -------------------------------------------------
-            def clean_value(value):
+                <div class="today-title">
+                    오늘 Aily가 선택한 한 권
+                </div>
 
-                if pd.isna(value):
-                    return "정보 없음"
-
-                return str(value)
-
+            </div>
+            """, unsafe_allow_html=True)
 
             title = clean_value(today_book["title"])
             author = clean_value(today_book["author"])
@@ -482,31 +539,6 @@ try:
             call_number = clean_value(today_book["call_number"])
             topic = clean_value(today_book["topic"])
 
-
-            # -------------------------------------------------
-            # 오늘의 책 제목
-            # -------------------------------------------------
-            st.markdown(
-                """
-                <div class="today-book">
-
-                    <div class="today-label">
-                        🎁 TODAY'S BOOK
-                    </div>
-
-                    <div class="today-title">
-                        오늘 Aily가 선택한 한 권
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-
-            # -------------------------------------------------
-            # 책 정보
-            # -------------------------------------------------
             st.markdown(
                 f"""
                 <div class="book-card">
@@ -527,12 +559,12 @@ try:
 
                         🏷️ <b>큐레이션 주제</b>　{topic}<br>
 
-                        🔖 <b>등록번호</b>　{reg_number}<br>
+                        🎟️ <b>등록번호</b>　{reg_number}
 
-                        <div class="call-number">
-                            📍 청구기호　{call_number}
-                        </div>
+                    </div>
 
+                    <div class="call-number">
+                        📍 청구기호　{call_number}
                     </div>
 
                 </div>
@@ -540,25 +572,61 @@ try:
                 unsafe_allow_html=True
             )
 
-
             st.info(
                 "💡 마음에 드는 책이라면 청구기호를 확인하고 "
                 "도서관에서 찾아보세요!"
             )
 
+            # 다른 책 뽑기
+            if st.button(
+                "🔄 다른 오늘의 책 뽑기",
+                key="another_today"
+            ):
 
-    # =====================================================
-    # 10. 하단
-    # =====================================================
-    st.markdown(
-        """
-        <div class="footer">
-            심곡도서관 × Aily &nbsp; | &nbsp; AI 북큐레이션
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+                all_books = make_all_books(all_topics_data)
 
+                if all_books:
+                    st.session_state["today_book"] = random.choice(all_books)
+
+                st.rerun()
+
+        st.write("")
+
+        # 처음으로
+        st.markdown(
+            '<div class="home-button">',
+            unsafe_allow_html=True
+        )
+
+        if st.button(
+            "🏠 처음으로 돌아가기",
+            key="home_from_today"
+        ):
+
+            st.session_state["mode"] = "home"
+            st.session_state["today_book"] = None
+
+            st.rerun()
+
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+    # --------------------------------------------------
+    # 푸터
+    # --------------------------------------------------
+
+    st.markdown("""
+    <div class="footer">
+        심곡도서관 × Aily &nbsp; | &nbsp; AI 북큐레이션
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# --------------------------------------------------
+# 파일 오류
+# --------------------------------------------------
 
 except FileNotFoundError:
 
@@ -566,3 +634,8 @@ except FileNotFoundError:
         "📂 엑셀 파일을 찾을 수 없습니다. "
         "'학습데이터.xlsx' 파일이 앱과 같은 폴더에 있는지 확인해주세요."
     )
+
+except Exception as e:
+
+    st.error("⚠️ 앱 실행 중 오류가 발생했습니다.")
+    st.code(str(e))
