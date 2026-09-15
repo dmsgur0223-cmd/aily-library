@@ -34,8 +34,6 @@ with col2:
 st.title("🐰 심곡도서관 보조사서 Aily")
 st.subheader("북큐레이션 주제 탐색!")
 
-st.caption("※ 이미 대출중일수도 있어요! 😅")
-
 st.divider()
 
 
