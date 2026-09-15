@@ -134,7 +134,7 @@ try:
 
     elif menu == "🔎 중복자료 점검":
 
-        st.subheader("🔎 학습데이터 중복자료 점검")
+        st.subheader("🔎 도서목록 중복자료 점검")
 
         st.caption(
             "학습데이터.xlsx의 모든 시트를 확인하여 "
