@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # =========================================================
-# 2. 디자인 CSS
+# 2. 디자인
 # =========================================================
 st.markdown("""
 <style>
@@ -83,6 +83,7 @@ st.markdown("""
     font-size: 1rem;
     font-weight: 700;
     box-shadow: 0 5px 15px rgba(111, 90, 168, 0.18);
+    transition: 0.2s;
 }
 
 .stButton > button:hover {
@@ -181,6 +182,7 @@ hr {
     margin: 25px 0;
 }
 
+/* 하단 */
 .footer {
     text-align: center;
     color: #aaa5b4;
@@ -201,7 +203,9 @@ def load_data(file_name):
 
 file_path = "학습데이터.xlsx"
 
+
 try:
+
     all_topics_data = load_data(file_path)
 
     # =====================================================
@@ -238,8 +242,9 @@ try:
 
     st.divider()
 
+
     # =====================================================
-    # 6. 첫 화면 메뉴
+    # 6. 첫 화면 - 북큐레이션
     # =====================================================
     st.markdown(
         """
@@ -247,8 +252,10 @@ try:
             <div class="menu-title">
                 📚 북큐레이션 추천
             </div>
+
             <div class="menu-description">
-                관심 있는 주제를 선택하면 Aily가 책 3권을 추천해드려요.
+                관심 있는 주제를 선택하면
+                Aily가 책 3권을 추천해드려요.
             </div>
         </div>
         """,
@@ -261,14 +268,20 @@ try:
     ):
         st.session_state["mode"] = "curation"
 
+
+    # =====================================================
+    # 7. 첫 화면 - 오늘의 한 권
+    # =====================================================
     st.markdown(
         """
         <div class="menu-card">
             <div class="menu-title">
                 🎁 오늘의 한 권
             </div>
+
             <div class="menu-description">
-                학습데이터에 등록된 모든 도서 중 Aily가 오늘의 책 한 권을 골라드려요.
+                학습데이터에 등록된 모든 도서 중
+                Aily가 오늘의 책 한 권을 골라드려요.
             </div>
         </div>
         """,
@@ -283,7 +296,7 @@ try:
 
 
     # =====================================================
-    # 7. 북큐레이션 모드
+    # 8. 북큐레이션 추천 화면
     # =====================================================
     if st.session_state.get("mode") == "curation":
 
@@ -347,6 +360,7 @@ try:
                 ):
 
                     def get_value(position):
+
                         try:
                             value = row.iloc[position]
 
@@ -357,6 +371,7 @@ try:
 
                         except (IndexError, KeyError):
                             return "정보 없음"
+
 
                     reg_number = get_value(0)
                     call_number = get_value(1)
@@ -393,7 +408,7 @@ try:
 
 
     # =====================================================
-    # 8. 오늘의 한 권 모드
+    # 9. 오늘의 한 권
     # =====================================================
     elif st.session_state.get("mode") == "today":
 
@@ -410,12 +425,33 @@ try:
 
                     all_books.append({
                         "topic": topic,
-                        "reg_number": row.iloc[0] if len(row) > 0 else "정보 없음",
-                        "call_number": row.iloc[1] if len(row) > 1 else "정보 없음",
-                        "title": row.iloc[2] if len(row) > 2 else "정보 없음",
-                        "author": row.iloc[3] if len(row) > 3 else "정보 없음",
-                        "publisher": row.iloc[4] if len(row) > 4 else "정보 없음"
+
+                        "reg_number":
+                            row.iloc[0]
+                            if len(row) > 0
+                            else "정보 없음",
+
+                        "call_number":
+                            row.iloc[1]
+                            if len(row) > 1
+                            else "정보 없음",
+
+                        "title":
+                            row.iloc[2]
+                            if len(row) > 2
+                            else "정보 없음",
+
+                        "author":
+                            row.iloc[3]
+                            if len(row) > 3
+                            else "정보 없음",
+
+                        "publisher":
+                            row.iloc[4]
+                            if len(row) > 4
+                            else "정보 없음"
                     })
+
 
         if not all_books:
 
@@ -423,5 +459,110 @@ try:
                 "학습데이터에 등록된 도서가 없습니다."
             )
 
-        els
+        else:
 
+            today_book = random.choice(all_books)
+
+
+            # -------------------------------------------------
+            # 값 정리
+            # -------------------------------------------------
+            def clean_value(value):
+
+                if pd.isna(value):
+                    return "정보 없음"
+
+                return str(value)
+
+
+            title = clean_value(today_book["title"])
+            author = clean_value(today_book["author"])
+            publisher = clean_value(today_book["publisher"])
+            reg_number = clean_value(today_book["reg_number"])
+            call_number = clean_value(today_book["call_number"])
+            topic = clean_value(today_book["topic"])
+
+
+            # -------------------------------------------------
+            # 오늘의 책 제목
+            # -------------------------------------------------
+            st.markdown(
+                """
+                <div class="today-book">
+
+                    <div class="today-label">
+                        🎁 TODAY'S BOOK
+                    </div>
+
+                    <div class="today-title">
+                        오늘 Aily가 선택한 한 권
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+            # -------------------------------------------------
+            # 책 정보
+            # -------------------------------------------------
+            st.markdown(
+                f"""
+                <div class="book-card">
+
+                    <div class="book-number">
+                        🎁 Aily's PICK
+                    </div>
+
+                    <div class="book-title">
+                        📖 {title}
+                    </div>
+
+                    <div class="book-info">
+
+                        👤 <b>저자</b>　{author}<br>
+
+                        🏢 <b>출판사</b>　{publisher}<br>
+
+                        🏷️ <b>큐레이션 주제</b>　{topic}<br>
+
+                        🔖 <b>등록번호</b>　{reg_number}<br>
+
+                        <div class="call-number">
+                            📍 청구기호　{call_number}
+                        </div>
+
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+            st.info(
+                "💡 마음에 드는 책이라면 청구기호를 확인하고 "
+                "도서관에서 찾아보세요!"
+            )
+
+
+    # =====================================================
+    # 10. 하단
+    # =====================================================
+    st.markdown(
+        """
+        <div class="footer">
+            심곡도서관 × Aily &nbsp; | &nbsp; AI 북큐레이션
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+except FileNotFoundError:
+
+    st.error(
+        "📂 엑셀 파일을 찾을 수 없습니다. "
+        "'학습데이터.xlsx' 파일이 앱과 같은 폴더에 있는지 확인해주세요."
+    )
