@@ -17,7 +17,7 @@ with col2:
 
 # 2. 화면 제목 및 부제목 변경
 st.title("🐰 심곡도서관 보조사서 Aily")
-st.subheader("관심 있는 주제를 고르면 책을 추천해 드립니다!")
+st.subheader("북큐레이션 주제 탐색!")
 
 st.divider() 
 
