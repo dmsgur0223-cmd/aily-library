@@ -1,0 +1,12 @@
+.streamlit/secrets.toml
+.env
+*.env
+__pycache__/
+.pytest_cache/
+.venv/
+config/
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+local_uploads/
